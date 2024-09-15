@@ -21,11 +21,27 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/conduitio/conduit-commons/opencdc"
+	"github.com/conduitio/conduit-connector-generator/obfuscator"
 	"github.com/goccy/go-json"
 )
 
-var KnownTypes = []string{"int", "string", "time", "bool", "duration"}
+// Add new constants for specific string types
+const (
+	TypeName       = "name"
+	TypeEmail      = "email"
+	TypeEmployeeID = "employeeid"
+	TypeSSN        = "ssn"
+	TypeCreditCard = "creditcard"
+	TypeOrderNum   = "ordernumber"
+)
+
+// Update the KnownTypes slice to include the new types
+var KnownTypes = []string{
+	"int", "string", "time", "bool", "duration",
+	TypeName, TypeEmail, TypeEmployeeID, TypeSSN, TypeCreditCard, TypeOrderNum,
+}
 
 // RecordGenerator is an interface for generating records.
 type RecordGenerator interface {
@@ -142,6 +158,20 @@ func randomStructuredData(fields map[string]string) opencdc.Data {
 			data[field] = time.Duration(rand.Intn(1000)) * time.Second
 		case "bool":
 			data[field] = rand.Int()%2 == 0
+		case TypeName:
+			data[field] = gofakeit.Name()
+		case TypeEmail:
+			data[field] = gofakeit.Email()
+		case TypeEmployeeID:
+			data[field] = fmt.Sprintf("EMP%d", gofakeit.Number(1000, 9999))
+		case TypeSSN:
+			ssn := gofakeit.SSN()
+			data[field] = obfuscator.ObfuscateSSN(ssn)
+		case TypeCreditCard:
+			cc := gofakeit.CreditCardNumber(&gofakeit.CreditCardOptions{})
+			data[field] = obfuscator.ObfuscateCreditCard(cc)
+		case TypeOrderNum:
+			data[field] = fmt.Sprintf("ORD-%s", gofakeit.UUID())
 		default:
 			panic(fmt.Errorf("field %q contains invalid type: %v", field, typ))
 		}

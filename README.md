@@ -361,3 +361,36 @@ pipelines:
           collections.orders.format.options.product: string
           collections.orders.operations: create,update,delete
 ```
+
+## Supported Data Types
+
+The Generator Connector supports the following data types:
+
+- `int`: Random integer
+- `string`: Random sentence
+- `time`: Current time
+- `bool`: Random boolean
+- `duration`: Random duration (0 to 1000 seconds)
+- `name`: Random full name
+- `email`: Random email address
+- `employeeid`: Random employee ID (format: EMP####)
+- `ssn`: Random Social Security Number (obfuscated)
+- `creditcard`: Random credit card number (obfuscated)
+- `ordernumber`: Random order number (format: ORD-UUID)
+
+### New Data Types
+
+We've added several new data types to enhance the capabilities of the Generator Connector:
+
+1. `name`: Generates a random full name.
+2. `email`: Generates a random email address.
+3. `employeeid`: Generates a random employee ID in the format EMP#### (where #### is a random 4-digit number).
+4. `ssn`: Generates a random Social Security Number and obfuscates it for privacy (format: XXX-XX-####).
+5. `creditcard`: Generates a random credit card number and obfuscates it for privacy (format: XXXXXXXXXXXX####).
+6. `ordernumber`: Generates a random order number in the format ORD-UUID.
+
+These new types can be used in the `format.options` or `collections.*.format.options` configuration parameters, just like the existing types.
+
+### Example Configuration with New Types
+
+Here's an example of how to use these new types in your configuration:
