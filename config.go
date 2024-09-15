@@ -33,6 +33,16 @@ const (
 	FormatTypeFile       = "file"
 )
 
+// Add new constants for specific string types
+const (
+	TypeName       = "name"
+	TypeEmail      = "email"
+	TypeEmployeeID = "employeeid"
+	TypeSSN        = "ssn"
+	TypeCreditCard = "creditcard"
+	TypeOrderNum   = "ordernumber"
+)
+
 type Config struct {
 	Burst BurstConfig `json:"burst"`
 	// Number of records to be generated (0 means infinite).
@@ -204,7 +214,16 @@ func (c FormatConfig) validateFields(fields map[string]string) error {
 }
 
 func (c FormatConfig) knownType(typeString string) bool {
-	for _, t := range internal.KnownTypes {
+	knownTypes := append(internal.KnownTypes,
+		TypeName,
+		TypeEmail,
+		TypeEmployeeID,
+		TypeSSN,
+		TypeCreditCard,
+		TypeOrderNum,
+	)
+
+	for _, t := range knownTypes {
 		if strings.ToLower(typeString) == t {
 			return true
 		}
