@@ -23,7 +23,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/conduitio/conduit-commons/opencdc"
-	"github.com/conduitio/conduit-connector-generator/obfuscator"
 	"github.com/goccy/go-json"
 )
 
@@ -166,10 +165,12 @@ func randomStructuredData(fields map[string]string) opencdc.Data {
 			data[field] = fmt.Sprintf("EMP%d", gofakeit.Number(1000, 9999))
 		case TypeSSN:
 			ssn := gofakeit.SSN()
-			data[field] = obfuscator.ObfuscateSSN(ssn)
+			data[field] = ssn
+			// data[field] = obfuscator.ObfuscateSSN(ssn)
 		case TypeCreditCard:
 			cc := gofakeit.CreditCardNumber(&gofakeit.CreditCardOptions{})
-			data[field] = obfuscator.ObfuscateCreditCard(cc)
+			data[field] = cc
+			// data[field] = obfuscator.ObfuscateCreditCard(cc)
 		case TypeOrderNum:
 			data[field] = fmt.Sprintf("ORD-%s", gofakeit.UUID())
 		default:
