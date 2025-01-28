@@ -164,13 +164,13 @@ func randomStructuredData(fields map[string]string) opencdc.Data {
 		case TypeEmployeeID:
 			data[field] = fmt.Sprintf("EMP%d", gofakeit.Number(1000, 9999))
 		case TypeSSN:
-			ssn := gofakeit.SSN()
-			data[field] = ssn
-			// data[field] = obfuscator.ObfuscateSSN(ssn)
+			// Format as XXX-XX-1234 where only last 4 digits are visible
+			lastFour := fmt.Sprintf("%04d", gofakeit.Number(0, 9999))
+			data[field] = fmt.Sprintf("XXX-XX-%s", lastFour)
 		case TypeCreditCard:
-			cc := gofakeit.CreditCardNumber(&gofakeit.CreditCardOptions{})
-			data[field] = cc
-			// data[field] = obfuscator.ObfuscateCreditCard(cc)
+			// Format as XXXXXXXXXXXX1234 where only last 4 digits are visible
+			lastFour := fmt.Sprintf("%04d", gofakeit.Number(0, 9999))
+			data[field] = fmt.Sprintf("XXXXXXXXXXXX%s", lastFour)
 		case TypeOrderNum:
 			data[field] = fmt.Sprintf("ORD-%s", gofakeit.UUID())
 		default:
