@@ -39,7 +39,7 @@ func (Config) Parameters() map[string]config.Parameter {
 		},
 		ConfigCollectionsFormatOptions: {
 			Default:     "",
-			Description: "The options for the `raw` and `structured` format types. It accepts pairs\nof field names and field types, where the type can be one of: `int`, `string`, `time`, `bool`, `duration`.",
+			Description: "The options for the `raw` and `structured` format types. It accepts pairs\nof field names and field types, where the type can be one of: `int`, `string`, `time`, `bool`, `duration`,\n`name`, `email`, `employeeid`, `ssn`, `creditcard`, `ordernumber`.",
 			Type:        config.ParameterTypeString,
 			Validations: []config.Validation{},
 		},
@@ -67,7 +67,7 @@ func (Config) Parameters() map[string]config.Parameter {
 		},
 		ConfigFormatOptions: {
 			Default:     "",
-			Description: "The options for the `raw` and `structured` format types. It accepts pairs\nof field names and field types, where the type can be one of: `int`, `string`, `time`, `bool`, `duration`.",
+			Description: "The options for the `raw` and `structured` format types. It accepts pairs\nof field names and field types, where the type can be one of: `int`, `string`, `time`, `bool`, `duration`,\n`name`, `email`, `employeeid`, `ssn`, `creditcard`, `ordernumber`.",
 			Type:        config.ParameterTypeString,
 			Validations: []config.Validation{},
 		},
