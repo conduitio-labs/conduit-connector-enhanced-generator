@@ -62,7 +62,7 @@ func (g *baseRecordGenerator) Next() opencdc.Record {
 	metadata := make(opencdc.Metadata)
 	metadata.SetCreatedAt(time.Now())
 	if g.collection != "" {
-		metadata.SetCollection(g.collection)
+		metadata["collection"] = g.collection
 	}
 
 	rec := opencdc.Record{
@@ -187,4 +187,131 @@ func randomRawData(fields map[string]string) opencdc.RawData {
 		panic(fmt.Errorf("couldn't serialize data: %w", err))
 	}
 	return bytes
+}
+
+// Generator handles the generation of random data
+type Generator struct {
+	rand *rand.Rand
+}
+
+// NewGenerator creates a new Generator with the given seed
+func NewGenerator(seed int64) *Generator {
+	return &Generator{
+		rand: rand.New(rand.NewSource(seed)),
+	}
+}
+
+// Helper methods for the Generator
+func (g *Generator) firstName() string {
+	return gofakeit.FirstName()
+}
+
+func (g *Generator) lastName() string {
+	return gofakeit.LastName()
+}
+
+func (g *Generator) streetAddress() string {
+	return gofakeit.Street()
+}
+
+func (g *Generator) city() string {
+	return gofakeit.City()
+}
+
+func (g *Generator) state() string {
+	return gofakeit.State()
+}
+
+func (g *Generator) zipCode() string {
+	return gofakeit.Zip()
+}
+
+func (g *Generator) gender() string {
+	genders := []string{"male", "female"}
+	return genders[g.rand.Intn(len(genders))]
+}
+
+// FHIRPatient represents a FHIR patient resource
+type FHIRPatient struct {
+	ID   string `json:"id"`
+	Name []struct {
+		Family []string `json:"family"`
+		Given  []string `json:"given"`
+	} `json:"name"`
+	BirthDate string `json:"birthDate"`
+	Gender    string `json:"gender"`
+	Address   []struct {
+		Line       []string `json:"line"`
+		City       string   `json:"city"`
+		State      string   `json:"state"`
+		PostalCode string   `json:"postalCode"`
+		Country    string   `json:"country"`
+	} `json:"address"`
+}
+
+// GenerateFHIRPatient creates a new FHIR patient with random but realistic data
+func (g *Generator) GenerateFHIRPatient() (*FHIRPatient, error) {
+	patient := &FHIRPatient{
+		ID: fmt.Sprintf("%03d", g.rand.Intn(1000)), // Generate 3-digit ID
+		Name: []struct {
+			Family []string `json:"family"`
+			Given  []string `json:"given"`
+		}{
+			{
+				Family: []string{g.lastName()},
+				Given:  []string{g.firstName()},
+			},
+		},
+		Gender: g.gender(),
+		Address: []struct {
+			Line       []string `json:"line"`
+			City       string   `json:"city"`
+			State      string   `json:"state"`
+			PostalCode string   `json:"postalCode"`
+			Country    string   `json:"country"`
+		}{
+			{
+				Line:       []string{g.streetAddress()},
+				City:       g.city(),
+				State:      g.state(),
+				PostalCode: g.zipCode(),
+				Country:    "USA",
+			},
+		},
+	}
+
+	// Generate a random birthdate between 1920 and 2020
+	year := g.rand.Intn(100) + 1920
+	month := g.rand.Intn(12) + 1
+	day := g.rand.Intn(28) + 1 // Using 28 to avoid invalid dates
+	patient.BirthDate = fmt.Sprintf("%04d-%02d-%02d", year, month, day)
+
+	return patient, nil
+}
+
+// NewFHIRPatientRecordGenerator creates a RecordGenerator that generates FHIR patient records
+func NewFHIRPatientRecordGenerator(
+	collection string,
+	operations []opencdc.Operation,
+) (RecordGenerator, error) {
+	generator := NewGenerator(time.Now().UnixNano())
+
+	return &baseRecordGenerator{
+		collection: collection,
+		operations: operations,
+		generateData: func() opencdc.Data {
+			patient, err := generator.GenerateFHIRPatient()
+			if err != nil {
+				panic(fmt.Errorf("failed to generate FHIR patient: %w", err))
+			}
+
+			// Convert to JSON
+			bytes, err := json.Marshal(patient)
+			if err != nil {
+				panic(fmt.Errorf("failed to marshal FHIR patient: %w", err))
+			}
+
+			return opencdc.RawData(bytes)
+		},
+	}, nil
 }

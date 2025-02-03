@@ -21,7 +21,7 @@ import (
 
 	"github.com/conduitio/conduit-commons/config"
 	"github.com/conduitio/conduit-commons/opencdc"
-	"github.com/conduitio/conduit-connector-generator/internal"
+	"github.com/conduitio/conduit-connector-enhanced-generator/internal"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"golang.org/x/time/rate"
 )
@@ -66,6 +66,8 @@ func (s *Source) Open(_ context.Context, _ opencdc.Position) error {
 			gen, err = internal.NewRawRecordGenerator(collection, cfg.SdkOperations(), cfg.Format.Options)
 		case FormatTypeStructured:
 			gen, err = internal.NewStructuredRecordGenerator(collection, cfg.SdkOperations(), cfg.Format.Options)
+		case FormatTypeFHIR:
+			gen, err = internal.NewFHIRPatientRecordGenerator(collection, cfg.SdkOperations())
 		}
 		if err != nil {
 			return fmt.Errorf("failed to create record generator for collection %q: %w", collection, err)

@@ -86,3 +86,83 @@ func TestRandomRawData(t *testing.T) {
 		assert.Contains(t, structuredData, field)
 	}
 }
+
+func TestGenerateFHIRPatient(t *testing.T) {
+	g := NewGenerator(0)
+	patient, err := g.GenerateFHIRPatient()
+
+	if err != nil {
+		t.Fatalf("GenerateFHIRPatient failed: %v", err)
+	}
+
+	// Verify all required fields are present
+	if patient.ID == "" {
+		t.Error("Patient ID is empty")
+	}
+
+	if len(patient.Name) == 0 {
+		t.Error("Patient has no names")
+	} else {
+		if len(patient.Name[0].Family) == 0 {
+			t.Error("Patient has no family name")
+		}
+		if len(patient.Name[0].Given) == 0 {
+			t.Error("Patient has no given name")
+		}
+	}
+
+	if patient.BirthDate == "" {
+		t.Error("Patient has no birth date")
+	}
+
+	if patient.Gender == "" {
+		t.Error("Patient has no gender")
+	}
+
+	if len(patient.Address) == 0 {
+		t.Error("Patient has no addresses")
+	} else {
+		addr := patient.Address[0]
+		if len(addr.Line) == 0 {
+			t.Error("Address has no street line")
+		}
+		if addr.City == "" {
+			t.Error("Address has no city")
+		}
+		if addr.State == "" {
+			t.Error("Address has no state")
+		}
+		if addr.PostalCode == "" {
+			t.Error("Address has no postal code")
+		}
+		if addr.Country == "" {
+			t.Error("Address has no country")
+		}
+	}
+}
+
+func TestNewFHIRPatientRecordGenerator(t *testing.T) {
+	generator, err := NewFHIRPatientRecordGenerator(
+		"patients",
+		[]opencdc.Operation{opencdc.OperationCreate},
+	)
+	require.NoError(t, err)
+
+	record := generator.Next()
+
+	// Check record metadata
+	assert.Equal(t, "patients", record.Metadata["collection"])
+	assert.Equal(t, opencdc.OperationCreate, record.Operation)
+
+	// Verify the payload can be unmarshaled into a FHIRPatient
+	var patient FHIRPatient
+	err = json.Unmarshal(record.Payload.After.(opencdc.RawData), &patient)
+	require.NoError(t, err)
+
+	// Verify required fields
+	assert.NotEmpty(t, patient.ID)
+	assert.NotEmpty(t, patient.Name)
+	assert.NotEmpty(t, patient.BirthDate)
+	assert.NotEmpty(t, patient.Gender)
+	assert.NotEmpty(t, patient.Address)
+}

@@ -15,7 +15,7 @@
 package main
 
 import (
-	generator "github.com/conduitio/conduit-connector-generator"
+	generator "github.com/conduitio/conduit-connector-enhanced-generator"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 )
 

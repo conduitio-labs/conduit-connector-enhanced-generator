@@ -26,9 +26,9 @@ var version = "v0.9.2"
 // Specification returns the Plugin's Specification.
 func Specification() sdk.Specification {
 	return sdk.Specification{
-		Name:        "generator",
-		Summary:     "Generator plugin",
-		Description: "A plugin capable of generating dummy records (in JSON format).",
+		Name:        "enhanced-generator",
+		Summary:     "Enhanced Generator plugin",
+		Description: "A plugin capable of generating dummy records (including FHIR patient data) in JSON format.",
 		Version:     version,
 		Author:      "Meroxa, Inc.",
 	}

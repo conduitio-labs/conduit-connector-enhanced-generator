@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/conduitio/conduit-commons/opencdc"
+	"github.com/conduitio/conduit-connector-enhanced-generator/internal"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/goccy/go-json"
 	"github.com/matryer/is"
@@ -201,6 +202,44 @@ func testSourceRateLimit(t *testing.T, cfg map[string]string) {
 	// take 50ms.
 	time.Sleep(150 * time.Millisecond)
 	readAssertDelay(is, 50*time.Millisecond)
+}
+
+func TestSource_Read_FHIRData(t *testing.T) {
+	is := is.New(t)
+	underTest := openTestSource(
+		t,
+		map[string]string{
+			"recordCount": "1",
+			"format.type": "fhir",
+			"operations":  "create",
+		},
+	)
+
+	rec, err := underTest.Read(context.Background())
+	is.NoErr(err)
+
+	// Check that we got raw data (JSON)
+	v, ok := rec.Payload.After.(opencdc.RawData)
+	is.True(ok)
+
+	// Unmarshal into FHIRPatient to verify structure
+	var patient internal.FHIRPatient
+	err = json.Unmarshal(v, &patient)
+	is.NoErr(err)
+
+	// Verify required fields
+	is.True(patient.ID != "")
+	is.True(len(patient.Name) > 0)
+	is.True(len(patient.Name[0].Family) > 0)
+	is.True(len(patient.Name[0].Given) > 0)
+	is.True(patient.BirthDate != "")
+	is.True(patient.Gender != "")
+	is.True(len(patient.Address) > 0)
+	is.True(len(patient.Address[0].Line) > 0)
+	is.True(patient.Address[0].City != "")
+	is.True(patient.Address[0].State != "")
+	is.True(patient.Address[0].PostalCode != "")
+	is.True(patient.Address[0].Country != "")
 }
 
 func openTestSource(t *testing.T, cfg map[string]string) sdk.Source {
