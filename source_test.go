@@ -18,11 +18,12 @@ import (
 	"context"
 	"maps"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/William-Hill/conduit-connector-enhanced-generator/internal"
 	"github.com/conduitio/conduit-commons/opencdc"
-	"github.com/conduitio/conduit-connector-enhanced-generator/internal"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/goccy/go-json"
 	"github.com/matryer/is"
@@ -240,6 +241,49 @@ func TestSource_Read_FHIRData(t *testing.T) {
 	is.True(patient.Address[0].State != "")
 	is.True(patient.Address[0].PostalCode != "")
 	is.True(patient.Address[0].Country != "")
+}
+
+func TestSource_Read_HL7Data(t *testing.T) {
+	is := is.New(t)
+	underTest := openTestSource(
+		t,
+		map[string]string{
+			"recordCount": "1",
+			"format.type": "hl7",
+			"operations":  "create",
+		},
+	)
+
+	rec, err := underTest.Read(context.Background())
+	is.NoErr(err)
+
+	// Check that we got raw data (HL7 message)
+	v, ok := rec.Payload.After.(opencdc.RawData)
+	is.True(ok)
+
+	// Convert to string and verify HL7 message structure
+	message := string(v)
+
+	// Check for required segments
+	is.True(strings.HasPrefix(message, "MSH|"))
+	is.True(strings.Contains(message, "\nPID|"))
+
+	// Check for required fields in MSH segment
+	mshFields := strings.Split(strings.Split(message, "\n")[0], "|")
+	is.Equal(mshFields[3], "FACILITY") // Sending facility
+	is.Equal(mshFields[5], "FACILITY") // Receiving facility
+	is.Equal(mshFields[8], "ADT^A01")  // Message type
+	is.Equal(mshFields[10], "P")       // Processing ID
+	is.Equal(mshFields[11], "2.5")     // Version
+
+	// Check for required fields in PID segment
+	pidFields := strings.Split(strings.Split(message, "\n")[1], "|")
+	is.Equal(pidFields[1], "1")                                 // Set ID
+	is.True(pidFields[3] != "")                                 // Patient ID
+	is.True(strings.Contains(pidFields[5], "^"))                // Patient name contains separator
+	is.True(pidFields[7] != "")                                 // Birth date
+	is.True(pidFields[8] == "male" || pidFields[8] == "female") // Gender
+	is.True(strings.Contains(pidFields[11], "^"))               // Address contains separators
 }
 
 func openTestSource(t *testing.T, cfg map[string]string) sdk.Source {

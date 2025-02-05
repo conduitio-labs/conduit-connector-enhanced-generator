@@ -315,3 +315,88 @@ func NewFHIRPatientRecordGenerator(
 		},
 	}, nil
 }
+
+// HL7Message represents an HL7 message structure
+type HL7Message struct {
+	MSH MSHSegment
+	PID PIDSegment
+}
+
+type MSHSegment struct {
+	SendingApplication   string
+	SendingFacility      string
+	ReceivingApplication string
+	ReceivingFacility    string
+	DateTime             time.Time
+	MessageType          string
+	MessageControlID     string
+	ProcessingID         string
+	Version              string
+}
+
+type PIDSegment struct {
+	SetID       string
+	PatientID   string
+	PatientName string
+	DateOfBirth string
+	Gender      string
+	Address     string
+}
+
+// GenerateHL7Message creates a new HL7 message with random but realistic data
+func (g *Generator) GenerateHL7Message() (string, error) {
+	now := time.Now()
+
+	msh := MSHSegment{
+		SendingApplication:   "FHIR_CONVERTER",
+		SendingFacility:      "FACILITY",
+		ReceivingApplication: "HL7_PARSER",
+		ReceivingFacility:    "FACILITY",
+		DateTime:             now,
+		MessageType:          "ADT^A01",
+		MessageControlID:     now.Format("20060102150405"),
+		ProcessingID:         "P",
+		Version:              "2.5",
+	}
+
+	pid := PIDSegment{
+		SetID:       "1",
+		PatientID:   fmt.Sprintf("%03d", g.rand.Intn(1000)),
+		PatientName: fmt.Sprintf("%s^%s", g.lastName(), g.firstName()),
+		DateOfBirth: time.Date(1920+g.rand.Intn(100), time.Month(1+g.rand.Intn(12)), 1+g.rand.Intn(28), 0, 0, 0, 0, time.UTC).Format("2006-01-02"),
+		Gender:      g.gender(),
+		Address:     fmt.Sprintf("%s^%s^%s^%s^USA", g.streetAddress(), g.city(), g.state(), g.zipCode()),
+	}
+
+	// Format the HL7 message
+	message := fmt.Sprintf(
+		"MSH|^~\\&|%s|%s|%s|%s|%s||%s|%s|%s|%s|\n"+
+			"PID|%s||%s||%s||%s|%s|||%s||||||%s",
+		msh.SendingApplication, msh.SendingFacility, msh.ReceivingApplication, msh.ReceivingFacility,
+		msh.DateTime.Format("20060102150405"), msh.MessageType, msh.MessageControlID, msh.ProcessingID, msh.Version,
+		pid.SetID, pid.PatientID, pid.PatientName, pid.DateOfBirth, pid.Gender, pid.Address, pid.PatientID,
+	)
+
+	return message, nil
+}
+
+// NewHL7RecordGenerator creates a RecordGenerator that generates HL7 messages
+func NewHL7RecordGenerator(
+	collection string,
+	operations []opencdc.Operation,
+) (RecordGenerator, error) {
+	generator := NewGenerator(time.Now().UnixNano())
+
+	return &baseRecordGenerator{
+		collection: collection,
+		operations: operations,
+		generateData: func() opencdc.Data {
+			message, err := generator.GenerateHL7Message()
+			if err != nil {
+				panic(fmt.Errorf("failed to generate HL7 message: %w", err))
+			}
+
+			return opencdc.RawData(message)
+		},
+	}, nil
+}

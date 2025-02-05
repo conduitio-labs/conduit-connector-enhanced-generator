@@ -1,4 +1,4 @@
-module github.com/conduitio/conduit-connector-enhanced-generator
+module github.com/William-Hill/conduit-connector-enhanced-generator
 
 go 1.23.2
 

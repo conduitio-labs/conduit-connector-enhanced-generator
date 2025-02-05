@@ -22,8 +22,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/William-Hill/conduit-connector-enhanced-generator/internal"
 	"github.com/conduitio/conduit-commons/opencdc"
-	"github.com/conduitio/conduit-connector-enhanced-generator/internal"
 	"golang.org/x/time/rate"
 )
 
@@ -32,6 +32,7 @@ const (
 	FormatTypeStructured = "structured"
 	FormatTypeFile       = "file"
 	FormatTypeFHIR       = "fhir"
+	FormatTypeHL7        = "hl7"
 )
 
 // Add new constants for specific string types
@@ -77,8 +78,8 @@ type CollectionConfig struct {
 }
 
 type FormatConfig struct {
-	// The format of the generated payload data (raw, structured, file, fhir).
-	Type string `json:"type" validate:"inclusion=raw|structured|file|fhir"`
+	// The format of the generated payload data (raw, structured, file, fhir, hl7).
+	Type string `json:"type" validate:"inclusion=raw|structured|file|fhir|hl7"`
 	// The options for the `raw` and `structured` format types. It accepts pairs
 	// of field names and field types, where the type can be one of: `int`, `string`, `time`, `bool`, `duration`,
 	// `name`, `email`, `employeeid`, `ssn`, `creditcard`, `ordernumber`.
@@ -193,8 +194,8 @@ func (c FormatConfig) Validate() error {
 		if err != nil {
 			return fmt.Errorf("failed parsing fields: %w", err)
 		}
-	case FormatTypeFHIR:
-		// FHIR format doesn't need additional validation
+	case FormatTypeFHIR, FormatTypeHL7:
+		// These formats don't need additional validation
 		return nil
 	default:
 		return fmt.Errorf("unknown format type %q", c.Type)
