@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"testing"
 	"time"
 
@@ -165,4 +166,55 @@ func TestNewFHIRPatientRecordGenerator(t *testing.T) {
 	assert.NotEmpty(t, patient.BirthDate)
 	assert.NotEmpty(t, patient.Gender)
 	assert.NotEmpty(t, patient.Address)
+}
+
+func TestGenerateHL7v3Message(t *testing.T) {
+	g := NewGenerator(0)
+	message, err := g.GenerateHL7v3Message()
+	require.NoError(t, err)
+
+	// Verify XML structure
+	var patient HL7v3Patient
+	err = xml.Unmarshal(message, &patient)
+	require.NoError(t, err, "Generated XML should be valid")
+
+	// Verify required fields
+	assert.Regexp(t, `^pat-\d+`, patient.ID)
+	assert.NotEmpty(t, patient.Name)
+	assert.NotEmpty(t, patient.Name[0].Given)
+	assert.NotEmpty(t, patient.Name[0].Family)
+	assert.Contains(t, []string{"M", "F"}, patient.Gender)
+	assert.Regexp(t, `^\d{14}$`, patient.BirthTime) // YYYYMMDDHHMMSS format
+
+	// Verify address components
+	if assert.NotEmpty(t, patient.Address) {
+		addr := patient.Address[0]
+		assert.NotEmpty(t, addr.Street)
+		assert.NotEmpty(t, addr.City)
+		assert.NotEmpty(t, addr.State)
+		assert.NotEmpty(t, addr.ZipCode)
+	}
+}
+
+func TestNewHL7v3RecordGenerator(t *testing.T) {
+	generator, err := NewHL7v3RecordGenerator(
+		"hl7v3_patients",
+		[]opencdc.Operation{opencdc.OperationCreate},
+	)
+	require.NoError(t, err)
+
+	record := generator.Next()
+
+	// Check record metadata
+	assert.Equal(t, "hl7v3_patients", record.Metadata["collection"])
+	assert.Equal(t, opencdc.OperationCreate, record.Operation)
+
+	// Verify the payload is valid XML
+	var patient HL7v3Patient
+	err = xml.Unmarshal(record.Payload.After.(opencdc.RawData), &patient)
+	require.NoError(t, err)
+
+	// Verify namespace and root element
+	assert.Equal(t, "Patient", patient.XMLName.Local)
+	assert.Equal(t, "urn:hl7-org:v3", patient.XMLName.Space)
 }

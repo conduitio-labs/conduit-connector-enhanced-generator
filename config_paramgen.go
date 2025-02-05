@@ -51,10 +51,10 @@ func (Config) Parameters() map[string]config.Parameter {
 		},
 		ConfigCollectionsFormatType: {
 			Default:     "",
-			Description: "The format of the generated payload data (raw, structured, file, fhir, hl7).",
+			Description: "The format of the generated payload data (raw, structured, file, fhir, hl7, hl7v3).",
 			Type:        config.ParameterTypeString,
 			Validations: []config.Validation{
-				config.ValidationInclusion{List: []string{"raw", "structured", "file", "fhir", "hl7"}},
+				config.ValidationInclusion{List: []string{"raw", "structured", "file", "fhir", "hl7", "hl7v3"}},
 			},
 		},
 		ConfigCollectionsOperations: {
@@ -79,10 +79,10 @@ func (Config) Parameters() map[string]config.Parameter {
 		},
 		ConfigFormatType: {
 			Default:     "",
-			Description: "The format of the generated payload data (raw, structured, file, fhir, hl7).",
+			Description: "The format of the generated payload data (raw, structured, file, fhir, hl7, hl7v3).",
 			Type:        config.ParameterTypeString,
 			Validations: []config.Validation{
-				config.ValidationInclusion{List: []string{"raw", "structured", "file", "fhir", "hl7"}},
+				config.ValidationInclusion{List: []string{"raw", "structured", "file", "fhir", "hl7", "hl7v3"}},
 			},
 		},
 		ConfigOperations: {

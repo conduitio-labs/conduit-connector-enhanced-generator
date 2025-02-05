@@ -70,6 +70,8 @@ func (s *Source) Open(_ context.Context, _ opencdc.Position) error {
 			gen, err = internal.NewFHIRPatientRecordGenerator(collection, cfg.SdkOperations())
 		case FormatTypeHL7:
 			gen, err = internal.NewHL7RecordGenerator(collection, cfg.SdkOperations())
+		case FormatTypeHL7v3:
+			gen, err = internal.NewHL7v3RecordGenerator(collection, cfg.SdkOperations())
 		}
 		if err != nil {
 			return fmt.Errorf("failed to create record generator for collection %q: %w", collection, err)

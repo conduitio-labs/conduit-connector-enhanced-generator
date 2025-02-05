@@ -33,6 +33,7 @@ const (
 	FormatTypeFile       = "file"
 	FormatTypeFHIR       = "fhir"
 	FormatTypeHL7        = "hl7"
+	FormatTypeHL7v3      = "hl7v3"
 )
 
 // Add new constants for specific string types
@@ -78,8 +79,8 @@ type CollectionConfig struct {
 }
 
 type FormatConfig struct {
-	// The format of the generated payload data (raw, structured, file, fhir, hl7).
-	Type string `json:"type" validate:"inclusion=raw|structured|file|fhir|hl7"`
+	// The format of the generated payload data (raw, structured, file, fhir, hl7, hl7v3).
+	Type string `json:"type" validate:"inclusion=raw|structured|file|fhir|hl7|hl7v3"`
 	// The options for the `raw` and `structured` format types. It accepts pairs
 	// of field names and field types, where the type can be one of: `int`, `string`, `time`, `bool`, `duration`,
 	// `name`, `email`, `employeeid`, `ssn`, `creditcard`, `ordernumber`.
@@ -194,7 +195,7 @@ func (c FormatConfig) Validate() error {
 		if err != nil {
 			return fmt.Errorf("failed parsing fields: %w", err)
 		}
-	case FormatTypeFHIR, FormatTypeHL7:
+	case FormatTypeFHIR, FormatTypeHL7, FormatTypeHL7v3:
 		// These formats don't need additional validation
 		return nil
 	default:

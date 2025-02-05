@@ -15,6 +15,7 @@
 package internal
 
 import (
+	"encoding/xml"
 	"fmt"
 	"math/rand"
 	"os"
@@ -396,6 +397,97 @@ func NewHL7RecordGenerator(
 				panic(fmt.Errorf("failed to generate HL7 message: %w", err))
 			}
 
+			return opencdc.RawData(message)
+		},
+	}, nil
+}
+
+// HL7v3Patient represents an HL7 v3 Patient structure in XML format
+type HL7v3Patient struct {
+	XMLName xml.Name `xml:"urn:hl7-org:v3 Patient"`
+	ID      string   `xml:"id"`
+	Name    []struct {
+		Given  []string `xml:"given"`
+		Family string   `xml:"family"`
+	} `xml:"name"`
+	Gender    string `xml:"administrativeGenderCode>code"`
+	BirthTime string `xml:"birthTime>value"`
+	Address   []struct {
+		Street  []string `xml:"streetAddressLine"`
+		City    string   `xml:"city"`
+		State   string   `xml:"state"`
+		ZipCode string   `xml:"postalCode"`
+	} `xml:"addr"`
+}
+
+// GenerateHL7v3Message creates a new HL7 v3 XML message
+func (g *Generator) GenerateHL7v3Message() ([]byte, error) {
+	patient := &HL7v3Patient{
+		ID: fmt.Sprintf("pat-%d", g.rand.Intn(10000)),
+		Gender: func() string {
+			if g.gender() == "male" {
+				return "M"
+			}
+			return "F"
+		}(),
+		BirthTime: time.Date(
+			1950+g.rand.Intn(50),
+			time.Month(1+g.rand.Intn(12)),
+			1+g.rand.Intn(28),
+			0, 0, 0, 0, time.UTC,
+		).Format("20060102150405"),
+	}
+
+	// Generate name
+	name := struct {
+		Given  []string `xml:"given"`
+		Family string   `xml:"family"`
+	}{
+		Given:  []string{g.firstName()},
+		Family: g.lastName(),
+	}
+	patient.Name = append(patient.Name, name)
+
+	// Generate address
+	address := struct {
+		Street  []string `xml:"streetAddressLine"`
+		City    string   `xml:"city"`
+		State   string   `xml:"state"`
+		ZipCode string   `xml:"postalCode"`
+	}{
+		Street:  []string{g.streetAddress()},
+		City:    g.city(),
+		State:   g.state(),
+		ZipCode: g.zipCode(),
+	}
+	patient.Address = append(patient.Address, address)
+
+	// Generate XML with proper namespaces
+	output := []byte(`<?xml version="1.0" encoding="UTF-8"?>`)
+	xmlData, err := xml.MarshalIndent(patient, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal HL7 v3 XML: %w", err)
+	}
+	output = append(output, xmlData...)
+
+	return output, nil
+}
+
+// NewHL7v3RecordGenerator creates a RecordGenerator for HL7 v3 messages
+func NewHL7v3RecordGenerator(
+	collection string,
+	operations []opencdc.Operation,
+) (RecordGenerator, error) {
+	generator := NewGenerator(time.Now().UnixNano())
+
+	return &baseRecordGenerator{
+		collection: collection,
+		operations: operations,
+		generateData: func() opencdc.Data {
+			message, err := generator.GenerateHL7v3Message()
+			if err != nil {
+				panic(fmt.Errorf("failed to generate HL7 v3 message: %w", err))
+			}
 			return opencdc.RawData(message)
 		},
 	}, nil
