@@ -405,7 +405,7 @@ func NewHL7RecordGenerator(
 // HL7v3Patient represents an HL7 v3 Patient structure in XML format
 type HL7v3Patient struct {
 	XMLName xml.Name `xml:"urn:hl7-org:v3 Patient"`
-	ID      string   `xml:"id"`
+	ID      int      `xml:"id"`
 	Name    []struct {
 		Given  []string `xml:"given"`
 		Family string   `xml:"family"`
@@ -423,7 +423,7 @@ type HL7v3Patient struct {
 // GenerateHL7v3Message creates a new HL7 v3 XML message
 func (g *Generator) GenerateHL7v3Message() ([]byte, error) {
 	patient := &HL7v3Patient{
-		ID: fmt.Sprintf("pat-%d", g.rand.Intn(10000)),
+		ID: g.rand.Intn(10000),
 		Gender: func() string {
 			if g.gender() == "male" {
 				return "M"

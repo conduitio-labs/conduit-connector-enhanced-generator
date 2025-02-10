@@ -179,7 +179,8 @@ func TestGenerateHL7v3Message(t *testing.T) {
 	require.NoError(t, err, "Generated XML should be valid")
 
 	// Verify required fields
-	assert.Regexp(t, `^pat-\d+`, patient.ID)
+	assert.True(t, patient.ID >= 0 && patient.ID <= 9999,
+		"ID should be between 0 and 9999, got %d", patient.ID)
 	assert.NotEmpty(t, patient.Name)
 	assert.NotEmpty(t, patient.Name[0].Given)
 	assert.NotEmpty(t, patient.Name[0].Family)
@@ -217,4 +218,8 @@ func TestNewHL7v3RecordGenerator(t *testing.T) {
 	// Verify namespace and root element
 	assert.Equal(t, "Patient", patient.XMLName.Local)
 	assert.Equal(t, "urn:hl7-org:v3", patient.XMLName.Space)
+
+	// Verify ID is numeric
+	assert.True(t, patient.ID >= 0 && patient.ID <= 9999,
+		"ID should be between 0 and 9999, got %d", patient.ID)
 }
