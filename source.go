@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/William-Hill/conduit-connector-enhanced-generator/internal"
+	"github.com/conduitio-labs/conduit-connector-enhanced-generator/internal"
 	"github.com/conduitio/conduit-commons/config"
 	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"

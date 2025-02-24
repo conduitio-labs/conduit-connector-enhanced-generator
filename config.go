@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/William-Hill/conduit-connector-enhanced-generator/internal"
+	"github.com/conduitio-labs/conduit-connector-enhanced-generator/internal"
 	"github.com/conduitio/conduit-commons/opencdc"
 	"golang.org/x/time/rate"
 )

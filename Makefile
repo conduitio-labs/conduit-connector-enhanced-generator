@@ -2,7 +2,7 @@ VERSION=$(shell git describe --tags --dirty --always)
 
 .PHONY: build
 build:
-	go build -ldflags "-X 'github.com/William-Hill/conduit-connector-enhanced-generator.version=${VERSION}'" -o conduit-connector-enhanced-generator cmd/connector/main.go
+	go build -ldflags "-X 'github.com/conduitio-labs/conduit-connector-enhanced-generator.version=${VERSION}'" -o conduit-connector-enhanced-generator cmd/connector/main.go
 
 .PHONY: test
 test:
