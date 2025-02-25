@@ -193,12 +193,15 @@ func randomRawData(fields map[string]string) opencdc.RawData {
 // Generator handles the generation of random data
 type Generator struct {
 	rand *rand.Rand
+	// Add counter for unique IDs
+	patientIDCounter int
 }
 
 // NewGenerator creates a new Generator with the given seed
 func NewGenerator(seed int64) *Generator {
 	return &Generator{
-		rand: rand.New(rand.NewSource(seed)),
+		rand:             rand.New(rand.NewSource(seed)),
+		patientIDCounter: 0,
 	}
 }
 
@@ -252,8 +255,12 @@ type FHIRPatient struct {
 
 // GenerateFHIRPatient creates a new FHIR patient with random but realistic data
 func (g *Generator) GenerateFHIRPatient() (*FHIRPatient, error) {
+	// Increment counter for unique ID
+	g.patientIDCounter++
+
 	patient := &FHIRPatient{
-		ID: fmt.Sprintf("%03d", g.rand.Intn(1000)), // Generate 3-digit ID
+		// Use counter for ID instead of random number
+		ID: fmt.Sprintf("%d", g.patientIDCounter),
 		Name: []struct {
 			Family []string `json:"family"`
 			Given  []string `json:"given"`
@@ -347,6 +354,8 @@ type PIDSegment struct {
 // GenerateHL7Message creates a new HL7 message with random but realistic data
 func (g *Generator) GenerateHL7Message() (string, error) {
 	now := time.Now()
+	// Increment counter for unique ID
+	g.patientIDCounter++
 
 	msh := MSHSegment{
 		SendingApplication:   "FHIR_CONVERTER",
@@ -361,8 +370,9 @@ func (g *Generator) GenerateHL7Message() (string, error) {
 	}
 
 	pid := PIDSegment{
-		SetID:       "1",
-		PatientID:   fmt.Sprintf("%03d", g.rand.Intn(1000)),
+		SetID: "1",
+		// Use counter for PatientID instead of random number
+		PatientID:   fmt.Sprintf("%d", g.patientIDCounter),
 		PatientName: fmt.Sprintf("%s^%s", g.lastName(), g.firstName()),
 		DateOfBirth: time.Date(1920+g.rand.Intn(100), time.Month(1+g.rand.Intn(12)), 1+g.rand.Intn(28), 0, 0, 0, 0, time.UTC).Format("2006-01-02"),
 		Gender:      g.gender(),
@@ -422,8 +432,12 @@ type HL7v3Patient struct {
 
 // GenerateHL7v3Message creates a new HL7 v3 XML message
 func (g *Generator) GenerateHL7v3Message() ([]byte, error) {
+	// Increment counter for unique ID
+	g.patientIDCounter++
+
 	patient := &HL7v3Patient{
-		ID: g.rand.Intn(10000),
+		// Use counter for ID instead of random number
+		ID: g.patientIDCounter,
 		Gender: func() string {
 			if g.gender() == "male" {
 				return "M"

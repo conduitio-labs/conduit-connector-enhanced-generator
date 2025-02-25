@@ -21,7 +21,7 @@ import (
 // version is set during the build process (i.e. the Makefile).
 // Default version matches default from runtime/debug.
 // var version = "(devel)"
-var version = "v0.9.3"
+var version = "v0.9.5"
 
 // Specification returns the Plugin's Specification.
 func Specification() sdk.Specification {
