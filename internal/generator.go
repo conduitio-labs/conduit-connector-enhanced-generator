@@ -259,8 +259,8 @@ func (g *Generator) GenerateFHIRPatient() (*FHIRPatient, error) {
 	g.patientIDCounter++
 
 	patient := &FHIRPatient{
-		// Use counter for ID instead of random number
-		ID: fmt.Sprintf("%d", g.patientIDCounter),
+		// Use counter for ID with 10-digit format
+		ID: fmt.Sprintf("%010d", g.patientIDCounter),
 		Name: []struct {
 			Family []string `json:"family"`
 			Given  []string `json:"given"`
@@ -371,8 +371,8 @@ func (g *Generator) GenerateHL7Message() (string, error) {
 
 	pid := PIDSegment{
 		SetID: "1",
-		// Use counter for PatientID instead of random number
-		PatientID:   fmt.Sprintf("%d", g.patientIDCounter),
+		// Use counter for PatientID with 10-digit format
+		PatientID:   fmt.Sprintf("%010d", g.patientIDCounter),
 		PatientName: fmt.Sprintf("%s^%s", g.lastName(), g.firstName()),
 		DateOfBirth: time.Date(1920+g.rand.Intn(100), time.Month(1+g.rand.Intn(12)), 1+g.rand.Intn(28), 0, 0, 0, 0, time.UTC).Format("2006-01-02"),
 		Gender:      g.gender(),
