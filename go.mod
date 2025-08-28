@@ -9,7 +9,7 @@ require (
 	github.com/goccy/go-json v0.10.5
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/matryer/is v1.4.1
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 	golang.org/x/time v0.12.0
 )
 
