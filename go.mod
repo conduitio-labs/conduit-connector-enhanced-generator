@@ -10,7 +10,7 @@ require (
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/matryer/is v1.4.1
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/time v0.12.0
+	golang.org/x/time v0.13.0
 )
 
 require (
